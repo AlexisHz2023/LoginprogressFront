@@ -13,15 +13,16 @@ import { SingUpButton } from "@/components/ui/buttonsing";
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { FontPage } from "@/components/login/font";
+import { entrenadorAPI } from "../../../utils/supabase/api";
+import { Toaster, toast } from 'react-hot-toast';
 
-export default function () {
+export default function LoginPage() {
   const header = <div className="font-bold mb-3"></div>;
   const footer = (
     <>
@@ -71,12 +72,47 @@ export default function () {
     },
   });
 
-  const onSubmit = form.handleSubmit((values: UserType) => {
-    console.log(values);
+  const onSubmit = form.handleSubmit(async (values: UserType) => {
+    try {
+      const entrenadorData = {
+        nombre: values.name,
+        apellido: values.lastname,
+        correo: values.email,
+        contrasena: values.password
+      };
+      
+      const response = await entrenadorAPI.create(entrenadorData);
+      console.log('Entrenador creado:', response);
+      
+      // Toast de éxito
+      toast.success('Usuario creado exitosamente!', {
+        duration: 3000,
+        position: 'top-center',
+        style: {
+          background: '#10B981',
+          color: 'white',
+        },
+      });
+      
+      form.reset({
+        name: "",
+        lastname: "",
+        email: "",
+        password: ""
+      });
+
+    } catch (error) {
+      console.error('Error al crear entrenador:', error);
+      toast.error('Error al crear el usuario. Por favor, intente nuevamente.', {
+        duration: 3000,
+        position: 'top-center',
+      });
+    }
   });
 
   return (
     <div className="h-screen w-full bg-neutral-950 relative flex flex-col items-center justify-center antialiased overflow-hidden">
+      <Toaster />
       <div className="max-w-2xl mx-auto p-4 gap-4 z-20 grid  grid-cols-2 ">
         <FontPage />
         <Card className="p-5">
