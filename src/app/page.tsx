@@ -1,101 +1,163 @@
-import Image from "next/image";
+'use client'
+
+import React,{ useState} from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel } from "@/components/ui/form";
+import { useForm } from 'react-hook-form'
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Password } from 'primereact/password';
+import { Divider } from 'primereact/divider';
+import { FontPage } from '@/components/login/font'
+
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+  const header = <div className="font-bold mb-3"></div>;
+  const footer = (
+    <>
+    <Divider />
+    <p className="text-black">Sugerencias:</p>
+    <ul className="pl-0.5 list-disc ml-0.5 mt-0 line-height-3">
+      <li>Agrege mayusculas</li>
+      <li>Ingrese minusculas</li>
+      <li>Ingrese Numeros</li>
+      <li>Minimo 8 caracteres</li>
+    </ul>
+    </>
+  )
+
+  const userSchema = z.object({
+    name: z.string({
+      required_error: "Nombre es requerido",
+    }).min(3, "El nombre debe tener como minimo 3 caracteres"),
+    lastname: z.string({
+      required_error: "Apellido es requerido",
+    }).min(3, "El Apellido debe tener como minimo 3 caracteres"),
+    email: z.string({
+      required_error: "Correo es requerido",
+    }).email(),
+    password: z.string({
+      required_error: "La contrasena es requerida",
+    }).min(3, 'La contrasena es requeridad')
+  });
+
+  type UserType = z.infer<typeof userSchema>
+
+    const form = useForm<UserType>({ 
+      resolver: zodResolver(userSchema),
+      defaultValues: {
+        name: "",
+        lastname: "",
+        email: "",
+        password: "",
+      }
+    })
+
+    console.log(form.formState.errors)
+
+    const onSubmit = form.handleSubmit((values: UserType) => {
+      console.log(values)
+      //Aqui ya se puede enviar los datos al servidor en este caso Supabase
+    })
+
+  return (
+    <div className="p-10">
+    <FontPage />
+    <Card className="p-5">
+      <CardHeader>
+        <CardTitle className="text-center">Crear una cuenta</CardTitle>
+      </CardHeader>
+      <CardContent>
+      <Form {...form}>
+      <form className="flex flex-col gap-y-2" onSubmit={onSubmit}>
+        <FormField
+        name="name"
+        control={form.control}
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel className="text-gray-600 font-sans">Nombre</FormLabel>
+            <FormControl>
+            <Input type="text" {...field} />
+          </FormControl>
+          {form.formState.errors?.name && (
+            <p className="text-red-400 text-sm">
+              {form.formState.errors?.name.message}
+            </p>
+          )}
+          </FormItem>
+        )}
+        />
+
+        <FormField
+        name="lastname"
+        control={form.control}
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel className="text-gray-600 font-sans">Apellido</FormLabel>
+            <FormControl>
+              <Input type="text" {...field} />
+            </FormControl>
+            {form.formState.errors?.lastname && (
+            <p className="text-red-400 text-sm">
+              {form.formState.errors?.lastname.message}
+            </p>
+            )}
+          </FormItem>
+        )}
+        />
+
+        <FormField
+        name="email"
+        control={form.control}
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel className="text-gray-600 font-sans">Correo Electronico</FormLabel>
+            <FormControl>
+              <Input type="text" {...field} />
+            </FormControl>
+            {form.formState.errors?.email && (
+            <p className="text-red-400 text-sm">
+              {form.formState.errors?.email.message}
+            </p>
+            )}
+          </FormItem>
+        )}
+        />
+
+        <FormField
+        name="password"
+        control={form.control}
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel className="text-gray-600 font-sans">Contrasena</FormLabel>
+            <br />
+            <FormControl>
+              
+              <Password
+              className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
+              header={header} 
+              footer={footer}
+              type="text" {...field}  
+              />
+              
+            </FormControl>
+            {form.formState.errors?.password && (
+            <p className="text-red-400 text-sm">
+              {form.formState.errors?.password.message}
+            </p>
+            )}
+          </FormItem>
+        )}
+        />
+    
+        <Button className="bg-[#82F8C6] text-black hover:text-white">Registrar</Button>
+      </form>
+      </Form>
+      </CardContent>
+    </Card>
     </div>
   );
 }
