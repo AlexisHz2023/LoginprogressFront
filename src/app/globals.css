@@ -74,3 +74,13 @@ body {
     @apply bg-background text-foreground;
   }
 }
+
+.nunito-sans-900 {
+  font-family: var(--font-nunito-sans);
+  font-optical-sizing: auto;
+  font-weight: 900;
+  font-style: normal;
+  font-variation-settings:
+    "wdth" 100,
+    "YTLC" 200;
+}

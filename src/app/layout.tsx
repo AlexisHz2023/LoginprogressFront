@@ -1,19 +1,13 @@
-
 import type { Metadata } from "next";
-import localFont from "next/font/local";
+import { Nunito_Sans } from 'next/font/google';
 import "./globals.css";
 import "primereact/resources/themes/lara-light-cyan/theme.css";
 import "primereact/resources/primereact.min.css";
 
-const geistSans = localFont({
-  src: "./fonts/GeistVF.woff",
-  variable: "--font-geist-sans",
-  weight: "100 900",
-});
-const geistMono = localFont({
-  src: "./fonts/GeistMonoVF.woff",
-  variable: "--font-geist-mono",
-  weight: "100 900",
+const nunitoSans = Nunito_Sans({
+  subsets: ['latin'],
+  weight: ['900'],
+  variable: '--font-nunito-sans',
 });
 
 export const metadata: Metadata = {
@@ -23,16 +17,12 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+}: {
+  children: React.ReactNode
+}) {
   return (
-    <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        {children}
-      </body>
+    <html lang="en" className={`${nunitoSans.variable}`}>
+      <body>{children}</body>
     </html>
-  );
+  )
 }

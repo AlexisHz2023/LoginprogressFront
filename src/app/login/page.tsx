@@ -6,59 +6,87 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Divider } from "primereact/divider";
 import { useForm } from "react-hook-form";
-import { Password } from "primereact/password";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { SingUpButton } from "@/components/ui/buttonsing";
+import Link from "next/link";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
+  FormMessage,
 } from "@/components/ui/form";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
 import { Input } from "@/components/ui/input";
-import { FontPage } from "@/components/login/font";
 import { entrenadorAPI } from "../../../utils/supabase/api";
-import { Toaster, toast } from 'react-hot-toast';
+import { Toaster, toast } from "react-hot-toast";
 
 export default function LoginPage() {
-  const header = <div className="font-bold mb-3"></div>;
-  const footer = (
-    <>
-      <Divider />
-      <p className="text-black">Sugerencias:</p>
-      <ul className="pl-0.5 list-disc ml-0.5 mt-0 line-height-3">
-        <li>Agrege mayusculas</li>
-        <li>Ingrese minusculas</li>
-        <li>Ingrese Numeros</li>
-        <li>Minimo 8 caracteres</li>
-      </ul>
-    </>
-  );
-
   const userSchema = z.object({
+
+    //
+    entrenador: z.enum(["Si", "No"], {
+      required_error: "Este dato es requerido",
+    }),
+
+    //
     name: z
       .string({
         required_error: "Nombre es requerido",
       })
       .min(3, "El nombre debe tener como minimo 3 caracteres"),
+    //
+    
+    //
+    genero: z.enum(["Masculino", "Femenino"], {
+      required_error: "Este dato es requerido",
+    }),
+    //
+
+    //
     lastname: z
       .string({
         required_error: "Apellido es requerido",
       })
       .min(3, "El Apellido debe tener como minimo 3 caracteres"),
+      //
+
+      //
     email: z
       .string({
         required_error: "Correo es requerido",
       })
       .email(),
-    password: z
-      .string({
-        required_error: "La contrasena es requerida",
-      })
-      .min(3, "La contrasena es requeridad"),
+
+      //
+    telefono: z.string({
+    }).min(12, "Este campo es requerido"),
+
+    //
+    ciudad: z
+    .string({
+    }).min(20, "Este campo es requerido"),
+    //
+    ocupacion: z.string({}),
+
+    //
   });
+
+  const entrenadores = ["Si", "No"];
+  const generos = ["Masculino", "Femenino"];
 
   type UserType = z.infer<typeof userSchema>;
 
@@ -66,46 +94,53 @@ export default function LoginPage() {
     resolver: zodResolver(userSchema),
     defaultValues: {
       name: "",
+      genero: "",
       lastname: "",
       email: "",
-      password: "",
+      telefono: "",
+      ciudad: "",
+      ocupacion: "",
     },
   });
 
   const onSubmit = form.handleSubmit(async (values: UserType) => {
     try {
       const entrenadorData = {
+        entrenador: values.entrenador,
         nombre: values.name,
         apellido: values.lastname,
         correo: values.email,
-        contrasena: values.password
+        telefono: values.telefono,
+        ciudad: values.ciudad,
       };
-      
+
       const response = await entrenadorAPI.create(entrenadorData);
-      console.log('Entrenador creado:', response);
-      
+      console.log("Entrenador creado:", response);
+
       // Toast de éxito
-      toast.success('Usuario creado exitosamente!', {
+      toast.success("Usuario creado exitosamente!", {
         duration: 3000,
-        position: 'top-center',
+        position: "top-center",
         style: {
-          background: '#10B981',
-          color: 'white',
+          background: "#10B981",
+          color: "white",
         },
       });
-      
+
       form.reset({
+        entrenador: "",
         name: "",
         lastname: "",
         email: "",
-        password: ""
+        telefono: "",
+        ciudad: "",
+        ocupacion: "",
       });
-
     } catch (error) {
-      console.error('Error al crear entrenador:', error);
-      toast.error('Error al crear el usuario. Por favor, intente nuevamente.', {
+      console.error("Error al crear entrenador:", error);
+      toast.error("Error al crear el usuario. Por favor, intente nuevamente.", {
         duration: 3000,
-        position: 'top-center',
+        position: "top-center",
       });
     }
   });
@@ -113,63 +148,142 @@ export default function LoginPage() {
   return (
     <div className="h-screen w-full bg-neutral-950 relative flex flex-col items-center justify-center antialiased overflow-hidden">
       <Toaster />
-      <div className="max-w-2xl mx-auto p-4 gap-4 z-20 grid  grid-cols-2 ">
-        <FontPage />
+
+      <div className="max-w-2xl mx-auto p-4 gap-0 z-20 grid  grid-cols-2 ">
+        <div className="bg-black w-[30rem] relative rounded-l-lg right-40 flex flex-col items-center justify-center antialiased p-10 shadow-lg">
+          <img src="icons.png" className="w-96 h-auto z-20" />
+
+          <div className="p-2 relative -top-20 flex flex-col items-center text-center">
+            <p className="text-[#82F8C6] text-lg nunito-sans-900">
+              Gestiona a tus clientes de manera digital. Completa estos datos y
+              no te pierdas ningún detalle en nuestro proceso.
+            </p>
+          </div>
+        </div>
         <Card className="p-5">
           <CardHeader>
             <CardTitle className="text-center text-xl font-sans">
-              Crear una cuenta
+              Formulario
             </CardTitle>
           </CardHeader>
           <CardContent>
             <Form {...form}>
               <form className="flex flex-col gap-y-4" onSubmit={onSubmit}>
                 <FormField
-                  name="name"
                   control={form.control}
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-gray-600 font-sans">Nombre</FormLabel>
-                      <FormControl>
-                        <Input type="text" {...field} />
-                      </FormControl>
-
-                      {form.formState.errors?.name && (
-                        <p className="text-red-400 text-sm">
-                          {form.formState.errors?.name.message}
-                        </p>
-                      )}
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  name="lastname"
-                  control={form.control}
+                  name="entrenador"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className="text-gray-600 font-sans">
-                        Apellido
+                        Entrenador
                       </FormLabel>
-                      <FormControl>
-                        <Input type="text" {...field} />
-                      </FormControl>
-                      {form.formState.errors?.lastname && (
-                        <p className="text-red-400 text-sm">
-                          {form.formState.errors?.lastname.message}
-                        </p>
-                      )}
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Selecciona tu respuesta" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {entrenadores.map((entrenador) => (
+                            <SelectItem key={entrenador} value={entrenador}>
+                              {entrenador}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormDescription></FormDescription>
+                      <FormMessage />
                     </FormItem>
                   )}
                 />
 
+                <div className="flex">
+                  <div className="p-2">
+                    <FormField
+                      name="name"
+                      control={form.control}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-gray-600 font-sans">
+                            Nombre
+                          </FormLabel>
+                          <FormControl>
+                            <Input type="text" {...field} />
+                          </FormControl>
+
+                          {form.formState.errors?.name && (
+                            <p className="text-red-400 text-sm">
+                              {form.formState.errors?.name.message}
+                            </p>
+                          )}
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
+                  <div className="p-2">
+                    <FormField
+                      name="lastname"
+                      control={form.control}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-gray-600 font-sans">
+                            Apellidos
+                          </FormLabel>
+                          <FormControl>
+                            <Input type="text" {...field} />
+                          </FormControl>
+
+                          {form.formState.errors?.lastname && (
+                            <p className="text-red-400 text-sm">
+                              {form.formState.errors?.lastname.message}
+                            </p>
+                          )}
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                </div>
+                <FormField
+                  control={form.control}
+                  name="genero"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-gray-600 font-sans">
+                        Genero
+                      </FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Selecciona tu respuesta" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {generos.map((genero) => (
+                            <SelectItem key={genero} value={genero}>
+                              {genero}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormDescription></FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
                 <FormField
                   name="email"
                   control={form.control}
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className="text-gray-600 font-sans">
-                        Correo Electronico
+                        Correo Electrónico
                       </FormLabel>
                       <FormControl>
                         <Input type="text" {...field} />
@@ -184,46 +298,95 @@ export default function LoginPage() {
                 />
 
                 <FormField
-                  name="password"
+                  name="telefono"
                   control={form.control}
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className="text-gray-600 font-sans">
-                        Contrasena
+                        Numero telefonico
                       </FormLabel>
                       <br />
                       <FormControl>
-                        <Password
-                          className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
-                          header={header}
-                          footer={footer}
-                          type="text"
-                          {...field}
-                        />
+                        <Input type="number" {...field}></Input>
                       </FormControl>
-                      {form.formState.errors?.password && (
+                      {form.formState.errors?.telefono && (
                         <p className="text-red-400 text-sm">
-                          {form.formState.errors?.password.message}
+                          {form.formState.errors?.telefono.message}
                         </p>
                       )}
                     </FormItem>
                   )}
                 />
 
-                <Button className="bg-[#82F8C6] font-sans text-black hover:text-white">
-                  Registrar
-                </Button>
+                <FormField
+                  name="ciudad"
+                  control={form.control}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-gray-600 font-sans">
+                        Ciudad
+                      </FormLabel>
+                      <br />
+                      <FormControl>
+                        <Input type="text" {...field}></Input>
+                      </FormControl>
+                      {form.formState.errors?.ciudad && (
+                        <p className="text-red-400 text-sm">
+                          {form.formState.errors?.ciudad.message}
+                        </p>
+                      )}
+                    </FormItem>
+                  )}
+                />
 
-                <div className="flex items-center space-x-2">
-                  <hr className="flex-grow border-zinc-200 dark:border-zinc-700" />
-                  <span className="text-zinc-400 dark:text-zinc-300 text-sm">
-                    OR
-                  </span>
-                  <hr className="flex-grow border-zinc-200 dark:border-zinc-700" />
+                <FormField
+                  name="ocupacion"
+                  control={form.control}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-gray-600 font-sans">
+                        Ocupación <span className="text-red-500">*</span> este
+                        campo es opcional
+                      </FormLabel>
+                      <br />
+                      <FormControl>
+                        <Input type="text" {...field}></Input>
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+
+                <div className="items-top flex space-x-2">
+                  <Checkbox id="terms1"
+                   />
+                  <div className="grid gap-1.5 leading-none">
+                    <label
+                      htmlFor="terms1"
+                      className="text-sm font-sans leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                    >
+                      Aceptar términos y condiciones
+                    </label>
+                    <p className="text-sm text-muted-foreground font-sans">
+                      Acepta nuestros Términos de servicio y Política de
+                      privacidad.
+                    </p>
+                  </div>
                 </div>
-                <div className="py-2">
-                <SingUpButton></SingUpButton>
+
+                <div className="items-top flex space-x-2">
+                  <Checkbox id="terms1" />
+                  <div className="grid gap-1.5 leading-none">
+                    <label
+                      htmlFor="terms1"
+                      className="text-sm font-sans leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                    >
+                     <p className="text-gray-600">¿Permites que <span className="text-black">progressPro </span> pro te envie informacion sobre el dia de lanzamiento y promociones?</p>
+                    </label>
+                  </div>
                 </div>
+                <Button className="bg-[#82F8C6] font-sans text-black hover:text-white">
+                  Enviar
+                </Button>
               </form>
             </Form>
           </CardContent>
